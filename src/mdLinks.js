@@ -32,7 +32,6 @@ function validate(link) {
       .on('error', () => {
         resolve({ ...link, status: 'FAIL', ok: 'fail' });
       })
-      .end();
   });
 }
 
@@ -97,5 +96,5 @@ module.exports = {
   mdLinks,
   readMarkdownFile,
   validate,
-  normalizeURL
+  normalizeURL,
 };
