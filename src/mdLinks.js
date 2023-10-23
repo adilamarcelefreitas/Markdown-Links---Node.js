@@ -15,6 +15,7 @@ function validate(link) {
     const protocol = link.href.startsWith('https') ? https : http;
     const requestOptions = {
       method: 'HEAD',
+      timeout: 5000,
     };
 
     protocol
@@ -30,7 +31,7 @@ function validate(link) {
       .on('error', () => {
         resolve({ ...link, status: 'FAIL', ok: 'FAIL' });
       })
-      // .end();
+      .end();
   });
 }
 
