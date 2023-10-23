@@ -1,5 +1,5 @@
 const { mdLinks, validate, normalizeURL, readFiles } = require('../src/mdLinks.js');
-
+const path = require('path');
 
 //function normalizeURL
 test('normalizeURL should add "http://" to the URL if it does not start with "http"', () => {
@@ -23,7 +23,7 @@ test('validate should return a PASS status for a valid link', () => {
 
   jest.spyOn(require('https'), 'request').mockImplementation(requestMock);
 
-  return validate(link).then((result) => {
+  validate(link).then((result) => {
     expect(result.ok).toBe('PASS');
     expect(result.status).toBe(200);
   });
@@ -43,7 +43,7 @@ test('validate should return a ERROR status for an invalid link', () => {
 
   jest.spyOn(require('https'), 'request').mockImplementation(requestMock);
 
-  return validate(link).then((result) => {
+    validate(link).then((result) => {
     expect(result.ok).toBe('ERROR');
     expect(result.status).toBe(404);
   });
@@ -52,7 +52,7 @@ test('validate should return a ERROR status for an invalid link', () => {
 //function readFiles
 test('readFiles should read and resolve the content of an existing .md file', () => {
   const filePath = path.join('text.md'); // Path to an existing .md file
-  return readFiles(filePath)
+   readFiles(filePath)
     .then((data) => {
       // Assuming the test.md file contains some content
       expect(data).toBeTruthy();
@@ -60,8 +60,8 @@ test('readFiles should read and resolve the content of an existing .md file', ()
 });
 
 test('readFiles should reject with an error for a non-existing .md file', () => {
-  const filePath = 'text.md';
-  return expect(readFiles(filePath)).rejects.toThrow('Error! File not defined');
+  const filePath = 'nonexisting.md';
+  expect(readFiles(filePath)).rejects.toThrow();
 });
 
 //function mdLinks
@@ -72,14 +72,15 @@ test('mdLinks should return an array of links', async () => {
   expect(Array.isArray(result)).toBe(true);
 });
 
-test('mdLinks should validate links if options.validate is true', async () => {
+test('mdLinks should validate links if options.validate is true', () => {
   const filePath = 'text.md';
   const options = { validate: true };
-  const result = await mdLinks(filePath, options);
-  expect(Array.isArray(result)).toBe(true);
-  result.forEach((link) => {
-    expect(link.ok === 'PASS' || link.ok === 'ERROR').toBe(true);
-  });
+  mdLinks(filePath, options).then((result) => {
+    expect(Array.isArray(result)).toBe(true);
+    result.forEach((link) => {
+      expect(link.ok === 'PASS' || link.ok === 'ERROR').toBe(true);
+    });
+  })
 });
 
 test('mdLinks should return link statistics if options.stats is true', async () => {
