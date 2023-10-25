@@ -15,12 +15,11 @@ function validate(link) {
     const protocol = link.href.startsWith('https') ? https : http;
     const requestOptions = {
       method: 'HEAD',
-      timeout: 5000,
     };
 
     const request = protocol.request(link.href, requestOptions, (res) => {
       const { statusCode } = res;
-
+      
       if (statusCode >= 200 && statusCode < 400) {
         resolve({ ...link, status: statusCode, ok: 'PASS' });
       } else {
