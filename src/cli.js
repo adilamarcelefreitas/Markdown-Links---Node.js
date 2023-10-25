@@ -27,7 +27,6 @@ mdLinks(filePath, options)
           } else {
             output += ` ${chalk.bgRed(link.status)}`;
           }
-          //output += ` ${chalk.dim(link.status)}`;
         }
         console.log(output);
       });
