@@ -18,26 +18,26 @@ function validate(link) {
       timeout: 5000,
     };
 
-    protocol
-      .request(link.href, requestOptions, (res) => {
-        const { statusCode } = res;
+    const request = protocol.request(link.href, requestOptions, (res) => {
+      const { statusCode } = res;
 
-        if (statusCode >= 200 && statusCode < 400) {
-          resolve({ ...link, status: statusCode, ok: 'PASS' });
-        } else {
-          resolve({ ...link, status: statusCode, ok: 'ERROR' });
-        }
-      })
-      .on('error', () => {
-        resolve({ ...link, status: 'FAIL', ok: 'FAIL' });
-      })
-      .end();
+      if (statusCode >= 200 && statusCode < 400) {
+        resolve({ ...link, status: statusCode, ok: 'PASS' });
+      } else {
+        resolve({ ...link, status: statusCode, ok: 'ERROR' });
+      }
+    });
+
+    request.on('error', () => {
+      resolve({ ...link, status: 'FAIL', ok: 'FAIL' });
+    });
+
+    request.end();
   });
 }
 
 function readFiles(filePath) {
   return new Promise((resolve, reject) => {
-    // Verifica se o arquivo tem extensão .md
     if (path.extname(filePath) !== '.md') {
       reject(new Error('Error! File or directory not defined'));
     } else {
@@ -67,28 +67,41 @@ function mdLinks(filePath, options) {
 
         if (options && options.validate) {
           const linkPromises = links.map(validate);
+
           Promise.all(linkPromises)
             .then((validatedLinks) => {
-              resolve(validatedLinks);
+              if (options && options.stats) {
+                const uniqueLinks = Array.from(new Set(validatedLinks.map((link) => link.href)));
+                const stats = {
+                  total: validatedLinks.length,
+                  unique: uniqueLinks.length,
+                  broken: validatedLinks.filter((link) => link.ok === 'FAIL').length,
+                };
+                resolve(stats);
+              } else {
+                resolve(validatedLinks);
+              }
+            })
+            .catch((error) => {
+              reject(error);
             });
         } else {
-          resolve(links);
+          if (options && options.stats) {
+            const uniqueLinks = Array.from(new Set(links.map((link) => link.href)));
+            const stats = {
+              total: links.length,
+              unique: uniqueLinks.length,
+              broken: links.filter((link) => link.ok === 'FAIL').length,
+            };
+            resolve(stats);
+          } else {
+            resolve(links);
+          }
         }
       })
       .catch((error) => {
         reject(error);
       });
-  }).then((links) => {
-    if (options && options.stats) {
-      const uniqueLinks = Array.from(new Set(links.map((link) => link.href)));
-      const stats = {
-        total: links.length,
-        unique: uniqueLinks.length,
-        broken: links.filter((link) => link.ok === 'FAIL').length,
-      };
-      return stats;
-    }
-    return links;
   });
 }
 
@@ -96,5 +109,5 @@ module.exports = {
   mdLinks,
   readFiles,
   validate,
-  normalizeURL
+  normalizeURL,
 };

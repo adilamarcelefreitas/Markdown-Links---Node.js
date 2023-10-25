@@ -42,6 +42,8 @@ test('validate should return a ERROR status for an invalid link', () => {
   });
 
   jest.spyOn(require('https'), 'request').mockImplementation(requestMock);
+  
+  jest.spyOn(require('http'), 'request').mockImplementation(requestMock);
 
     validate(link).then((result) => {
     expect(result.ok).toBe('ERROR');
