@@ -6,7 +6,7 @@
   },
   "scripts": {
     "lint": "npx eslint ./src",
-    "test": "jest --coverage"
+     "test": "jest --coverage"
   },
   "bin": {
     "md-links": "src/cli.js"

@@ -19,7 +19,6 @@ function validate(link) {
 
     const request = protocol.request(link.href, requestOptions, (res) => {
       const { statusCode } = res;
-      
       if (statusCode >= 200 && statusCode < 400) {
         resolve({ ...link, status: statusCode, ok: 'PASS' });
       } else {
@@ -84,18 +83,16 @@ function mdLinks(filePath, options) {
             .catch((error) => {
               reject(error);
             });
+        } else if (options && options.stats) {
+          const uniqueLinks = Array.from(new Set(links.map((link) => link.href)));
+          const stats = {
+            total: links.length,
+            unique: uniqueLinks.length,
+            broken: links.filter((link) => link.ok === 'FAIL').length,
+          };
+          resolve(stats);
         } else {
-          if (options && options.stats) {
-            const uniqueLinks = Array.from(new Set(links.map((link) => link.href)));
-            const stats = {
-              total: links.length,
-              unique: uniqueLinks.length,
-              broken: links.filter((link) => link.ok === 'FAIL').length,
-            };
-            resolve(stats);
-          } else {
-            resolve(links);
-          }
+          resolve(links);
         }
       })
       .catch((error) => {
