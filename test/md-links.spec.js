@@ -1,11 +1,12 @@
-const { mdLinks, validate, normalizeURL, readFiles } = require('../src/mdLinks.js');
+const { mdLinks, readFiles, validate, normalizeURL } = require('../src/mdLinks.js');
+const fs = require('fs');
 const path = require('path');
 
 describe('normalizeURL', () => {
-  it('normalizeURL should add "https://" to the URL if it does not start with "http"', () => {
+  it('should normalize URLs', () => {
     const url = 'example.com';
-    const normalized = normalizeURL(url);
-    expect(normalized).toBe('http://example.com');
+    const normalizedURL = normalizeURL(url);
+    expect(normalizedURL).toBe('http://example.com');
   });
 
   it('should not modify URLs that already have a protocol', () => {
@@ -20,7 +21,17 @@ describe('normalizeURL', () => {
 });
 
 describe('validate', () => {
-  it('validate should return a PASS status for a valid link', () => {
+
+  it('should validate links if the "validate" option is provided', async () => {
+    const filePath = 'text.md';
+    const options = { validate: true };
+    const links = await mdLinks(filePath, options);
+    links.forEach(link => {
+      expect(link).toHaveProperty('ok');
+      expect(link).toHaveProperty('status');
+    });
+  });
+  it('should return a PASS status for a valid link', () => {
     const link = { href: 'https://example.com' };
     const responseMock = { statusCode: 200 };
     const requestMock = jest.fn().mockReturnValue({
@@ -40,9 +51,7 @@ describe('validate', () => {
     });
   });
 
-  
-
-  it('validate should return a ERROR status for an invalid link', () => {
+  it('should return a ERROR status for an invalid link', () => {
     const link = { href: 'https://example.com' };
     const responseMock = { statusCode: 404 };
     const requestMock = jest.fn().mockReturnValue({
@@ -63,7 +72,7 @@ describe('validate', () => {
       expect(result.status).toBe(404);
     });
   });
-  
+
   it('should handle an HTTP response with status code 301 (Redirect)', () => {
     const link = { href: 'https://example.com' };
     const responseMock = { statusCode: 301, headers: { location: 'https://newexample.com' } };
@@ -75,19 +84,19 @@ describe('validate', () => {
       },
       end: jest.fn(),
     });
-  
+
     jest.spyOn(require('https'), 'request').mockImplementation(requestMock);
 
     jest.spyOn(require('http'), 'request').mockImplementation(requestMock);
-  
+
     validate(link).then((result) => {
       expect(result.ok).toBe('REDIRECT');
       expect(result.status).toBe(301);
       expect(result.redirectedTo).toBe('https://newexample.com');
     });
   });
-  
-  it('validate should handle an error when a request fails', () => {
+
+  it('should handle an error when a request fails', () => {
     const link = { href: 'https://example.com' };
     const requestMock = jest.fn().mockReturnValue({
       on: (event, callback) => {
@@ -106,7 +115,7 @@ describe('validate', () => {
 });
 
 describe('readFiles', () => {
-  it('readFiles should read and resolve the content of an existing .md file', () => {
+  it('should read and resolve the content of an existing .md file', () => {
     const filePath = path.join('text.md');
     readFiles(filePath)
       .then((data) => {
@@ -114,18 +123,43 @@ describe('readFiles', () => {
       });
   });
 
-  it('readFiles should reject for a non-existing .md file', () => {
+  it('should reject for a non-existing .md file', () => {
     const filePath = 'nonexisting.md';
     expect(readFiles(filePath)).rejects.toThrow();
   });
 
-  it('readFiles should reject for a non-Markdown file', () => {
+  it('should reject for a non-Markdown file', () => {
     const filePath = 'text.txt'; // Use um arquivo que não é .md
     return expect(readFiles(filePath)).rejects.toThrow();
   });
 });
 
 describe('mdLinks', () => {
+  it('should read a Markdown file and return an array of links', async () => {
+    const filePath = 'text.md';
+    const links = await mdLinks(filePath);
+    expect(Array.isArray(links)).toBe(true);
+    expect(links.length).toBeGreaterThan(0);
+  });
+
+  it('should return link statistics if the "stats" option is provided', async () => {
+    const filePath = 'text.md';
+    const options = { stats: true };
+    const stats = await mdLinks(filePath, options);
+    expect(stats).toHaveProperty('total');
+    expect(stats).toHaveProperty('unique');
+    expect(stats).toHaveProperty('broken');
+  });
+
+  it('should handle errors when reading a non-Markdown file', async () => {
+    const filePath = 'text.md';
+    try {
+      await mdLinks(filePath);
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+    }
+  });
+
   it('should return an array of links', async () => {
     const filePath = 'text.md';
     const options = {};
@@ -151,7 +185,7 @@ describe('mdLinks', () => {
   });
 
   it('should return an array of links with ERROR status when at least one link is invalid', async () => {
-    const filePath = 'text.md'; 
+    const filePath = 'text.md';
     const options = { validate: false };
     const result = await mdLinks(filePath, options);
     expect(result.some((link) => link.ok === 'ERROR')).toBe(false);
@@ -163,12 +197,12 @@ describe('mdLinks', () => {
     const result = await mdLinks(filePath, options);
     expect(result.some((link) => link.ok === 'FAIL')).toBe(false);
   });
- 
-    it('should return an array of links with ERROR status/validate', async () => {
-      const filePath = 'text.md'; // Use um arquivo com links válidos
-      const options = { stats: false, validate: false };
-      const result = await mdLinks(filePath, options);
-      expect(result.every((link) => link.ok === 'ERROR')).toBe(false);
-    });
+
+  it('should return an array of links with ERROR status/validate', async () => {
+    const filePath = 'text.md'; // Use um arquivo com links válidos
+    const options = { stats: false, validate: false };
+    const result = await mdLinks(filePath, options);
+    expect(result.every((link) => link.ok === 'ERROR')).toBe(false);
   });
-  
+});
+
