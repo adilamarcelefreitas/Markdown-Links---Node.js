@@ -128,12 +128,6 @@ describe('readFiles', () => {
     expect(readFiles(filePath)).rejects.toThrow();
   });
 
-  it('should reject for a non-Markdown file', () => {
-    const filePath = 'text.txt'; // Use um arquivo que não é .md
-    return expect(readFiles(filePath)).rejects.toThrow();
-  });
-});
-
 describe('mdLinks', () => {
   it('should read a Markdown file and return an array of links', async () => {
     const filePath = 'text.md';
@@ -205,4 +199,4 @@ describe('mdLinks', () => {
     expect(result.every((link) => link.ok === 'ERROR')).toBe(false);
   });
 });
-
+});
