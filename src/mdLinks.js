@@ -37,7 +37,7 @@ function validate(link) {
 function readFiles(filePath) {
   return new Promise((resolve, reject) => {
     if (path.extname(filePath) !== '.md') {
-      reject(new Error('Error! File or directory not defined'));
+      reject(new Error('File or directory not a .md'));
     } else {
       fs.readFile(filePath, 'utf8', (err, data) => {
         if (err) {

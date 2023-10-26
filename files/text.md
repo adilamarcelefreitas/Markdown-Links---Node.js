@@ -676,6 +676,4 @@ conta própria usando **new Promise()**
 É importante que você saiba o que é um **callback** porque serão usadas
 nas promessas.
 
-[Tá funcionando?](www.essesitenexiste8888888.co)
-[DevFrontEnd](www.classouid77777777.com)
 [Café faz bem ao Dev](http://www.sitequenaoexiste1234567890.com)
