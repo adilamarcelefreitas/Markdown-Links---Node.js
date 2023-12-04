@@ -2,12 +2,12 @@
 
 ## Índice
 
-* [1. Prefácio]
-* [2. Fluxograma]
-* [3. Instalação]
-* [4. Comandos no terminal]
-* [5. Testes]
-* [6. Checklist] 
+* [1. Prefácio](#1-prefácio)
+* [2. Fluxograma](#2-fluxograma)
+* [3. Instalação](#3-instalação)
+* [4. Comandos no terminal](#4-comandos-no-terminal)
+* [5. Testes](#5-testes)
+* [6. Checklist](#6-checklist)
 
 ***
 ## Prefácio
